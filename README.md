@@ -1,6 +1,6 @@
 # Easy Linescan
 
-Easily create [linescan-like](https://en.wikipedia.org/wiki/Strip_photography) train photos with a phone camera
+Easily create [linescan-like](https://en.wikipedia.org/wiki/Strip_photography) train photos with a phone camera instead of a $1000+ linescan camera
 
 ## Demo:
 
@@ -51,11 +51,11 @@ The keypoint matches in the red circle are the keypoints found on the train. In 
 To distinguish the 2 groups, [kernel density estimation](https://scikit-learn.org/stable/modules/density.html#kernel-density-estimation) is used (in the x axis) to create a graph like this:  
 ![Graph of the density of the change in x](https://github.com/junmuta/easy_linescan/blob/main/diagrams/demo_frame1-2_kde.png?raw=true)
 
-We can clearly see the 2 peaks (one for the station and one for the train), so we can simply find the local maximum turning point with the highest delta x value (bottom axis) to get the slice width for this frame.
+We can clearly see the 2 peaks (one for the station and one for the train), so we can simply find the local maximum turning point with the highest absolute delta x value (magnitude of the bottom axis) to get the slice width for this frame.
 
 The slice width for each frame is found like this, and they're put in a big array that contains the slice widths for each frame.  
 They're then processed (missing slice widths filled in, outliers removed, etc).  
-This is boring so I won't cover this. Have a look at the section from "def clean_slice_widths" in the code if you are curious.
+This part is boring so I won't cover this for now. Have a look at the section from "def clean_slice_widths" in the code if you are curious.
 
 At this point the slice widths are floating point numbers, but pixels are discrete so they need to be turned into integers.  
 Unfourtunately, simply rounding will create warping because something like  
