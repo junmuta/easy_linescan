@@ -1,0 +1,7 @@
+images/
+videos/
+backups/
+slice_widths.json
+processed_slice_widths.json
+output.png
+# demo/*.mp4
