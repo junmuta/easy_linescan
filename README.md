@@ -11,4 +11,4 @@ Output image:
 ![demo output](https://github.com/junmuta/easy_linescan/blob/main/demo/hcmt_epk.png?raw=true)
 
 Try this out for yourself:  
-    trackstrip.py -s demo/hcmt_epk.mp4 -rf 
+```trackstrip.py -s demo/hcmt_epk.mp4 -rf```
