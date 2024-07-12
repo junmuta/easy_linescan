@@ -13,7 +13,7 @@ Zoomed:
 ![demo zoomed output](https://github.com/junmuta/easy_linescan/blob/main/demo/hcmt_epk_zoomed.png?raw=true)
 
 Try this out for yourself:  
-```python3 trackstrip.py -s demo/hcmt_epk.mp4 -rf```
+```$ python3 trackstrip.py -s demo/hcmt_epk.mp4 -rf```
 
 ## How it works:
 
@@ -69,4 +69,14 @@ So, the modified rounding algorithm rounds each number, keeps track of the diffe
 Now, combining slices from each frame of the original video with the slice widths we found, we get:  
 ![demo output](https://github.com/junmuta/easy_linescan/blob/main/demo/hcmt_epk.png?raw=true)
 
-####Success!
+#### Success!
+
+## Limitations:
+
+The keypoints on the front wall of the train and the back wall aren't distinuished. When photographing trains with clear windows, lots of trackable details inside the train, and from a short distance, the slice widths can become innacurate due to parallax. This could possibly be fixed by generating a depth map from the image.
+
+As the camera has perspective, the keypoints distant from the centre of the screen will move at a different speed (in pixels) to those at the centre. This is not accounted for in the program.
+
+As slices from seperate frames are simply put next to each other with no regard for perspective, the output image will become very disjointed if the slice width is too large. This could be improved on by blurring adjacent slices together.
+
+Since there needs to be as little perspective shift from the end of one slice to the start of another, a decently high speed camera is required. For the demo images, my phone with 240fps video was used to shoot video with the Open Camera app. Luckily, modern smartphone cameras can shoot decently fast.
