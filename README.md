@@ -45,27 +45,28 @@ This assumes that the train only moves horizontally, so hopefully no one is tryi
 Without the outliers, the plot becomes much clearer, showing 2 distinct groups, circled with red and blue:  
 ![Plot of the position delta between the 2 frames without the outliers](https://github.com/junmuta/easy_linescan/blob/main/diagrams/demo_frame1-2_delta_scatter_zoomed_annotated.png?raw=true)
 
-The keypoint matches in the blue circle are from keypoints on the station. The movement in the x axis (bottom axis on the plot) can be observed to be around 0.
-The keypoint matches in the red circle are the keypoints found on the train. In this case they move around 9 pixels per frame (bottom axis) so this will be the slice width used for this frame when concatenating at the end.
+The keypoint matches in the blue circle are from keypoints on the station. The movement in the x axis (bottom axis on the plot) can be observed to be around 0.  
+The keypoint matches in the red circle are the keypoints found on the train. In this case they move around -9 pixels per frame (bottom axis) so this will be the slice width used for this frame when concatenating at the end.
 
-To distinguish the 2 groups, kernel density estimation is used (in the x axis) to create a graph like this:  
+To distinguish the 2 groups, [kernel density estimation](https://scikit-learn.org/stable/modules/density.html#kernel-density-estimation) is used (in the x axis) to create a graph like this:  
 ![Graph of the density of the change in x](https://github.com/junmuta/easy_linescan/blob/main/diagrams/demo_frame1-2_kde.png?raw=true)
 
 We can clearly see the 2 peaks (one for the station and one for the train), so we can simply find the local maximum turning point with the highest delta x value (bottom axis) to get the slice width for this frame.
 
 The slice width for each frame is found like this, and they're put in a big array that contains the slice widths for each frame.  
 They're then processed (missing slice widths filled in, outliers removed, etc).  
-This is boring so I won't cover this. Have a look at the sectoin from "def clean_slice_widths" in the code if you are curious.
+This is boring so I won't cover this. Have a look at the section from "def clean_slice_widths" in the code if you are curious.
 
 At this point the slice widths are floating point numbers, but pixels are discrete so they need to be turned into integers.  
-Unfourtunately, simply rounding will create warping because:
-```[7.3, 7.4, 7.4, 7.3]```
-will be turned into
-```[7, 7, 7, 7]```
+Unfourtunately, simply rounding will create warping because something like  
+```[7.3, 7.4, 7.4, 7.3]```  
+will be turned into  
+```[7, 7, 7, 7]```  
 and we lose 1.4 pixels worth of slice widths.
 
-So, the modified rounding algorithm rounds each number, keeps track the difference between the rounded number and the original, and uses that to restore any lost pixels. (line 369)
+So, the modified rounding algorithm rounds each number, keeps track of the difference between the rounded number and the original, and uses that to restore any lost pixels. (line 369)
 
 Now, combining slices from each frame of the original video with the slice widths we found, we get:  
-![demo output](https://github.com/junmuta/easy_linescan/blob/main/demo/hcmt_epk.png?raw=true)  
-Success!
+![demo output](https://github.com/junmuta/easy_linescan/blob/main/demo/hcmt_epk.png?raw=true)
+
+####Success!
