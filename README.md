@@ -8,7 +8,9 @@ Input video:
 ![demo video](https://github.com/junmuta/easy_linescan/blob/main/demo/hcmt_epk_smol.gif?raw=true)
 
 Output image:  
-![demo output](https://github.com/junmuta/easy_linescan/blob/main/demo/hcmt_epk.png?raw=true)
+![demo output](https://github.com/junmuta/easy_linescan/blob/main/demo/hcmt_epk.png?raw=true)  
+Zoomed:
+![demo zoomed output](https://github.com/junmuta/easy_linescan/blob/main/demo/hcmt_epk_zoomed.png?raw=true)
 
 Try this out for yourself:  
-```trackstrip.py -s demo/hcmt_epk.mp4 -rf```
+```python3 trackstrip.py -s demo/hcmt_epk.mp4 -rf```
