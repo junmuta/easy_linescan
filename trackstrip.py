@@ -117,9 +117,12 @@ def match_keypoints(kp_descs, bf, dy_limit, match_frame_dist, show=False):
     if show:
         vidcapf0 = cv2.VideoCapture(videoloc)
         vidcapf1 = cv2.VideoCapture(videoloc)
-        s0,f0 = vidcapf0.read() # get frame 0
-        s1,f1 = vidcapf1.read() # get frame 1
-        s1,f1 = vidcapf1.read()
+        # get frame 0
+        s0,f0 = vidcapf0.read() 
+        # get frame to compare to
+        for i in range(match_frame_dist+1):
+            s1,f1 = vidcapf1.read() 
+
 
     dxses = []
    
@@ -127,10 +130,10 @@ def match_keypoints(kp_descs, bf, dy_limit, match_frame_dist, show=False):
         kp_desc0 = kp_descs[i]
         kp_desc1 = kp_descs[i+match_frame_dist]
 
-        if i < len(kp_descs)-2:
-            print(f"Finding matches between frames {i} and {i+1}", end="\r")
+        if i < len(kp_descs)-(match_frame_dist+1):
+            print(f"Finding matches between frames {i} and {i+match_frame_dist}", end="\r")
         else:
-            print(f"Finding matches between frames {i} and {i+1}")
+            print(f"Finding matches between frames {i} and {i+match_frame_dist}")
 
         matches = bf.match(kp_desc0[1], kp_desc1[1])
 
