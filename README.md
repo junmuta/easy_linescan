@@ -80,3 +80,39 @@ As the camera has perspective, the keypoints distant from the centre of the scre
 As slices from seperate frames are simply put next to each other with no regard for perspective, the output image will become very disjointed if the slice width is too large. This could be improved on by blurring adjacent slices together.
 
 Since there needs to be as little perspective shift from the end of one slice to the start of another, a decently high speed camera is required. For the demo images, my phone with 240fps video was used to shoot video with the Open Camera app. Luckily, modern smartphone cameras can shoot decently fast.
+
+## Setup:
+
+1. Install dependencies  
+```
+$ pip install numpy opencv-python matplotlib scikit-learn
+```
+
+2. Clone the repository  
+```
+$ git clone https://github.com/junmuta/easy_linescan.git
+```
+
+## Usage:
+
+```
+$ python3 trackstrip.py -s my_video.mp4
+```
+
+### More options:
+
+```-s, --specify_video```: Select video file  
+```-o, --output_file```: Select file to output to  
+```-r, --reverse```: Reverse each slice in the x axis  
+```-f, --flip```: Flip final image in the x axis  
+```-c, --column```: Specify which column in the frames to take either side of as the slice  
+```-e, --consecutive_errors_tolerated```: Amount of consecutive tracking errors that declares the boundary of the train  
+```-d, --head_tail_to_discard```: Amount of frames next to the boundary that will be discarded (boundaries have unreliable tracking)  
+```-y, --dy_limit```: Limit of how much a keypoint can move in the y axis, until it's discarded
+```-m, --frame_match_dist```: How many frames apart the tracking is done (higher is smoother, lower is more sensitive)
+```--width_checking_radius```: Amount of frames on either side to consider for mean and stdevs when removing outlier slice widths
+```--override_multiply_widths```: A multiplier to override the slice widths by  
+```--debug_match```: Turn on visual debug output for keypoint matching  
+```--debug_separation```: Show kernel density estimation graph
+
+
