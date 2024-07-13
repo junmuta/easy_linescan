@@ -111,7 +111,7 @@ $ git clone https://github.com/junmuta/easy_linescan.git
 
 #### Linux:
 Install git-lfs from your package manager or [git-lfs.com](https://git-lfs.com)  
-Debian-based: ```sudo apt install git-lfs```
+Debian-based: ```sudo apt install git-lfs```  
 Archlinux: ```sudo pacman -S git-lfs```
 
 Run:  
@@ -121,11 +121,6 @@ $ git clone https://github.com/junmuta/easy_linescan.git
 ```
 
 (git lfs (large file storage) is required for the video file since it's 25MB+)
-
-
-```
-$ git clone https://github.com/junmuta/easy_linescan.git
-```
 
 ## Usage:
 
