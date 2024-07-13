@@ -100,8 +100,10 @@ $ git clone https://github.com/junmuta/easy_linescan.git
 
 If you want the demo/hcmt_epk.mp4 file:
 
-#### Windows:  
-Install git-lfs from [git-lfs.com](https://git-lfs.com)
+#### Linux:
+Install git-lfs from your package manager or [git-lfs.com](https://git-lfs.com)  
+Debian-based: ```sudo apt install git-lfs```  
+Archlinux: ```sudo pacman -S git-lfs```
 
 Run:  
 ```
@@ -109,10 +111,8 @@ $ git lfs install
 $ git clone https://github.com/junmuta/easy_linescan.git
 ```
 
-#### Linux:
-Install git-lfs from your package manager or [git-lfs.com](https://git-lfs.com)  
-Debian-based: ```sudo apt install git-lfs```  
-Archlinux: ```sudo pacman -S git-lfs```
+#### Windows:  
+Install git-lfs from [git-lfs.com](https://git-lfs.com)
 
 Run:  
 ```
