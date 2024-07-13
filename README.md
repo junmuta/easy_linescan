@@ -32,10 +32,10 @@ keypoints, descriptors = orb.compute(image, keypoints)
 ```
 
 These keypoints are then searched for in the 4th next frame (depends on configuration), to find matches:  
-![matched keypoints from the 2 frames](https://github.com/junmuta/easy_linescan/blob/main/diagrams/demo_frame1-2_matches.png?raw=true)
+![matched keypoints from the 2 frames](https://github.com/junmuta/easy_linescan/blob/main/diagrams/demo_frame0-4_matches.png?raw=true)
 
 Plotting the position change of these keypoints between the 2 frames, we get this:  
-![Plot of the position delta between the 2 frames](https://github.com/junmuta/easy_linescan/blob/main/diagrams/demo_frame1-2_delta_scatter.png?raw=true)
+![Plot of the position delta between the 2 frames](https://github.com/junmuta/easy_linescan/blob/main/diagrams/demo_frame0-4_delta_scatter.png?raw=true)
 
 There are outliers (shown in green and red) in this plot.  
 The green ones are removed by repeatedly filtering by the [z-score](https://statisticsbyjim.com/basics/z-score/) of the change in position.  
@@ -43,13 +43,13 @@ The red ones are removed by filtering by an absolute limit on movement in the y 
 This assumes that the train only moves horizontally, so hopefully no one is trying to use this to photograph a funicular.
 
 Without the outliers, the plot becomes much clearer, showing 2 distinct groups, circled with red and blue:  
-![Plot of the position delta between the 2 frames without the outliers](https://github.com/junmuta/easy_linescan/blob/main/diagrams/demo_frame1-2_delta_scatter_zoomed_annotated.png?raw=true)
+![Plot of the position delta between the 2 frames without the outliers](https://github.com/junmuta/easy_linescan/blob/main/diagrams/demo_frame0-4_delta_scatter_zoomed_annotated.png?raw=true)
 
 The keypoint matches in the blue circle are from keypoints on the station. The movement in the x axis (bottom axis on the plot) can be observed to be around 0.  
 The keypoint matches in the red circle are the keypoints found on the train. In this case they move around -9 pixels per frame (bottom axis) so this will be the slice width used for this frame when concatenating at the end.
 
 To distinguish the 2 groups, [kernel density estimation](https://scikit-learn.org/stable/modules/density.html#kernel-density-estimation) is used (in the x axis) to create a graph like this:  
-![Graph of the density of the change in x](https://github.com/junmuta/easy_linescan/blob/main/diagrams/demo_frame1-2_kde.png?raw=true)
+![Graph of the density of the change in x](https://github.com/junmuta/easy_linescan/blob/main/diagrams/demo_frame0-4_kde.png?raw=true)
 
 We can clearly see the 2 peaks (one for the station and one for the train), so we can simply find the local maximum turning point with the highest absolute delta x value (magnitude of the bottom axis) to get the slice width for this frame.
 

@@ -140,6 +140,7 @@ def match_keypoints(kp_descs, bf, dy_limit, match_frame_dist, show=False):
         matches = bf.match(kp_desc0[1], kp_desc1[1])
 
         if show:
+
             angle_rejected_dxs = []
             angle_rejected_dys = []
             y_rejected_dxs = []
@@ -181,7 +182,8 @@ def match_keypoints(kp_descs, bf, dy_limit, match_frame_dist, show=False):
         outlier_rejected_dys = []
         outlier_rejected_matches = []
         for i in range(4):
-            dxs, dys, matches, ordxs2, ordys2, orms2= remove_outliers(show, dxs, dys, matches, 5)
+            # dxs, dys, matches, ordxs2, ordys2, orms2= remove_outliers(show, dxs, dys, matches, 5)
+            dxs, dys, matches, ordxs2, ordys2, orms2= remove_outliers(show, dxs, dys, matches, 3)
             outlier_rejected_dxs += ordxs2
             outlier_rejected_dys += ordys2
             outlier_rejected_matches += orms2
@@ -194,6 +196,8 @@ def match_keypoints(kp_descs, bf, dy_limit, match_frame_dist, show=False):
             plt.show()
 
         if show:
+            f0 = cv2.cvtColor(f0, cv2.COLOR_BGR2GRAY)
+            f1 = cv2.cvtColor(f1, cv2.COLOR_BGR2GRAY)
             img = cv2.drawMatches(f0, kp_desc0[0], f1, kp_desc1[0], matches, None, flags=cv2.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
             plt.imshow(img)
             plt.show()
