@@ -71,6 +71,8 @@ Now, combining slices from each frame of the original video with the slice width
 
 #### Success!
 
+(These diagrams were generated with demo/comeng_trimmed.mp4)
+
 ## Limitations:
 
 The keypoints on the front wall of the train and the back wall aren't distinuished. When photographing trains with clear windows, lots of trackable details inside the train, and from a short distance, the slice widths can become innacurate due to parallax. This could possibly be fixed by generating a depth map from the image.
