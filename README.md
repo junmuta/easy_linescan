@@ -77,11 +77,11 @@ Now, combining slices from each frame of the original video with the slice width
 
 The keypoints on the front wall of the train and the back wall aren't distinuished. When photographing trains with clear windows, lots of trackable details inside the train, and from a short distance, the slice widths can become innacurate due to parallax. This could possibly be fixed by generating a depth map from the image.
 
-As the camera has perspective, the keypoints distant from the centre of the screen will move at a different speed (in pixels) to those at the centre. This is not accounted for in the program.
+As the camera has perspective, the keypoints distant from the centre of the screen will move at a different speed (in pixels/second) to those at the centre. This is not accounted for in the program.
 
 As slices from seperate frames are simply put next to each other with no regard for perspective, the output image will become very disjointed if the slice width is too large. This could be improved on by blurring adjacent slices together.
 
-Since there needs to be as little perspective shift from the end of one slice to the start of another, a decently high speed camera is required. For the demo images, my phone with 240fps video was used to shoot video with the Open Camera app. Luckily, modern smartphone cameras can shoot decently fast.
+Since there needs to be as little perspective shift from the end of one slice to the start of another, a decently high speed camera is required and the train cannot be moving too fast. For the demo images, my phone with 240fps video was used to shoot video with the Open Camera app. Luckily, modern smartphone cameras can shoot decently fast.
 
 ## Setup:
 
@@ -90,7 +90,38 @@ Since there needs to be as little perspective shift from the end of one slice to
 $ pip install numpy opencv-python matplotlib scikit-learn
 ```
 
-2. Clone the repository  
+2. Clone the repository
+
+If you don't need the demo/hcmt_epk.mp4 file:  
+```
+$ git clone https://github.com/junmuta/easy_linescan.git
+```
+
+If you want the demo/hcmt_epk.mp4 file:
+
+#### Windows:  
+Install git-lfs from [git-lfs.com](https://git-lfs.com)
+
+Run:  
+```
+$ git lfs install
+$ git clone https://github.com/junmuta/easy_linescan.git
+```
+
+#### Linux:
+Install git-lfs from your package manager or [git-lfs.com](https://git-lfs.com)  
+Debian-based: ```sudo apt install git-lfs```
+Archlinux: ```sudo pacman -S git-lfs```
+
+Run:  
+```
+$ git lfs install
+$ git clone https://github.com/junmuta/easy_linescan.git
+```
+
+(git lfs (large file storage) is required for the video file since it's 25MB+)
+
+
 ```
 $ git clone https://github.com/junmuta/easy_linescan.git
 ```
