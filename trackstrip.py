@@ -26,6 +26,7 @@ parser.add_argument('--width_allowed_stdevs') # stdevs of deviation from mean al
 parser.add_argument('--override_multiply_widths')
 parser.add_argument('--debug_match', action="store_true")
 parser.add_argument('--debug_separation', action="store_true")
+parser.add_argument('--output_slice_widths', action="store_true")
 
 args = parser.parse_args()
 
@@ -43,6 +44,7 @@ width_multiplier = args.override_multiply_widths
 match_frame_dist = args.frame_match_dist
 checking_radius = args.width_checking_radius
 allowed_stdevs = args.width_allowed_stdevs
+output_slice_widths = args.output_slice_widths
 
 def get_keypoints(videoloc, orb):
     vidcap = cv2.VideoCapture(videoloc)
@@ -429,13 +431,15 @@ if videoloc:
 
     dxses = match_keypoints(kp_descs, bf, dy_limit, match_frame_dist, show=debug_match)
     slice_widths = get_slice_widths(dxses, width_multiplier, show=debug_separation)
-    with open("slice_widths.json", "w") as f:
-        f.write(json.dumps(slice_widths))
+    if output_slice_widths:
+        with open("slice_widths.json", "w") as f:
+            f.write(json.dumps(slice_widths))
     # slice_widths = json.loads(open("slice_widths.json").read())
     [None]*math.floor(match_frame_dist/2) + slice_widths + [None]*math.ceil(match_frame_dist/2) 
     slice_widths = clean_slice_widths(slice_widths, longest_allowed_None, discard_info, checking_radius, allowed_stdevs)
-    with open("processed_slice_widths.json", "w") as f:
-        f.write(json.dumps(slice_widths))
+    if output_slice_widths:
+        with open("processed_slice_widths.json", "w") as f:
+            f.write(json.dumps(slice_widths))
     image = construct_final_image(slice_widths, videoloc, column, reverse)
     if not output:
         output = "output.png"

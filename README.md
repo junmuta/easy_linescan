@@ -114,5 +114,6 @@ $ python3 trackstrip.py -s my_video.mp4
 ```--override_multiply_widths```: A multiplier to override the slice widths by  
 ```--debug_match```: Turn on visual debug output for keypoint matching  
 ```--debug_separation```: Show kernel density estimation graph
+```--output_slice_widths```: Output slice width (velocity in pixels/frame) data as json
 
 
