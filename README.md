@@ -88,7 +88,8 @@ Since there needs to be as little perspective shift from the end of one slice to
 1. Install dependencies  
 ```
 $ pip install numpy opencv-python matplotlib scikit-learn
-```
+```  
+(You will need to create a [Python virtual environment](https://docs.python.org/3/library/venv.html) on most Linux distributions.)
 
 2. Clone the repository
 
