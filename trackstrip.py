@@ -21,6 +21,8 @@ parser.add_argument('-e', '--consecutive_errors_tolerated')
 parser.add_argument('-d', '--head_tail_to_discard')
 parser.add_argument('-y', '--dy_limit')
 parser.add_argument('-m', '--frame_match_dist') # amount of frames to jump for finding matching keypoints in 
+parser.add_argument('--kernel_bandwidth') # higher is a smoother kde graph
+parser.add_argument('--match_outlier_stdevs')  # stdevs of deviation from mean allowed for matches
 parser.add_argument('--width_checking_radius') # amount of frames on either side to consider for mean and stdevs
 parser.add_argument('--width_allowed_stdevs') # stdevs of deviation from mean allowed for each frame width
 parser.add_argument('--override_multiply_widths')
@@ -45,6 +47,10 @@ match_frame_dist = args.frame_match_dist
 checking_radius = args.width_checking_radius
 allowed_stdevs = args.width_allowed_stdevs
 output_slice_widths = args.output_slice_widths
+match_outlier_stdevs = args.match_outlier_stdevs
+kernel_bandwidth = args.kernel_bandwidth
+
+cache_dir = "~/.cache/easy_linescan"
 
 def get_keypoints(videoloc, orb):
     vidcap = cv2.VideoCapture(videoloc)
@@ -72,6 +78,11 @@ def get_keypoints(videoloc, orb):
     return kp_descs
 
 def remove_outliers(show, dxs, dys, matches, stdevs):
+    if not stdevs:
+        stdevs = 3
+    else:
+        stdevs = int(stdevs)
+    
     dxs_stdev = np.std(dxs)
     dxs_mean = np.mean(dxs)
 
@@ -109,7 +120,7 @@ def find_maximums(e, s): # doesn't do shit about same values next to each other,
     maximums = sorted(maximums, reverse=True, key=lambda max: max[1])
     return maximums
 
-def match_keypoints(kp_descs, bf, dy_limit, match_frame_dist, show=False):
+def match_keypoints(kp_descs, bf, dy_limit, match_frame_dist, match_outlier_stdevs, show=False):
 
     if not dy_limit:
         dy_limit = 10
@@ -183,7 +194,7 @@ def match_keypoints(kp_descs, bf, dy_limit, match_frame_dist, show=False):
         outlier_rejected_matches = []
         for i in range(4):
             # dxs, dys, matches, ordxs2, ordys2, orms2= remove_outliers(show, dxs, dys, matches, 5)
-            dxs, dys, matches, ordxs2, ordys2, orms2= remove_outliers(show, dxs, dys, matches, 3)
+            dxs, dys, matches, ordxs2, ordys2, orms2= remove_outliers(show, dxs, dys, matches, match_outlier_stdevs)
             outlier_rejected_dxs += ordxs2
             outlier_rejected_dys += ordys2
             outlier_rejected_matches += orms2
@@ -213,11 +224,16 @@ def match_keypoints(kp_descs, bf, dy_limit, match_frame_dist, show=False):
 
     return dxses
 
-def get_slice_widths(dxses, width_multiplier, show=False):
+def get_slice_widths(dxses, width_multiplier, kernel_bandwidth, show=False):
     if width_multiplier:
         width_multiplier = float(width_multiplier)
     else:
         width_multiplier = 1
+    if kernel_bandwidth:
+        kernel_bandwidth = float(kernel_bandwidth)
+    else:
+        kernel_bandwidth = 1
+
     slice_widths = []
     for dxs in dxses:
         # https://stackoverflow.com/questions/35094454/how-would-one-use-kernel-density-estimation-as-a-1d-clustering-method-in-scikit/35151947#35151947
@@ -225,7 +241,7 @@ def get_slice_widths(dxses, width_multiplier, show=False):
             slice_widths.append(None)
             continue
         a = np.array(dxs).reshape(-1, 1)
-        kde = KernelDensity(kernel='gaussian', bandwidth=1).fit(a)
+        kde = KernelDensity(kernel='gaussian', bandwidth=kernel_bandwidth).fit(a)
         s = np.linspace(min(dxs),max(dxs))
 
         e = kde.score_samples(s.reshape(-1,1))
@@ -422,6 +438,42 @@ def construct_final_image(slice_widths, videoloc, column, reverse):
     print(f"Combining frame {count}, column {pos}")
     return final_image
 
+def verify_cache(cache_path): # cache path should be ~/.cache/easy_linescan/slice_width_data.json
+    cache_dir = os.path.dirname(cache_path)
+    if not os.path.isdir(cache_dir):
+        print(f"The cache directory doesn't exist, creating {cache_dir}")
+        os.makedirs(cache_dir)
+
+    if not os.path.isfile(cache_path):
+        print(f"The cache file doesn't exist, creating {os.path.basename(cache_path)}")
+        with open(cache_path, "w") as f:
+            f.write(json.dumps({}))
+    return True
+
+def get_sha256sum(file):
+    print("Calculating sha256sum hash of video file")
+    with open(file, "rb") as f: # b means byte
+        bytes = f.read()
+        hash = hashlib.sha256(bytes).hexdigest()
+    return hash
+
+def write_cache(slice_widths, cache_path, video_hash):
+    with open(cache_path, "r") as f:
+        cache = json.loads(f.read())
+    cache[video_hash] = slice_widths
+    with open(cache_path, "w") as f:
+        f.write(json.dumps(cache))
+    return True
+
+def read_cache(cache_path, video_hash):
+    with open(cache_path, "r") as f:
+        cache = json.loads(f.read())
+    if video_hash in cache:
+        print("Loading slices from cache")
+        return cache[video_hash]
+    else:
+        return False
+
 if videoloc:
     orb = cv2.ORB_create() # orb keypoint grabber
     kp_descs = get_keypoints(videoloc, orb)
@@ -433,8 +485,8 @@ if videoloc:
     else:
         match_frame_dist = int(match_frame_dist)
 
-    dxses = match_keypoints(kp_descs, bf, dy_limit, match_frame_dist, show=debug_match)
-    slice_widths = get_slice_widths(dxses, width_multiplier, show=debug_separation)
+    dxses = match_keypoints(kp_descs, bf, dy_limit, match_frame_dist, match_outlier_stdevs, show=debug_match)
+    slice_widths = get_slice_widths(dxses, width_multiplier, kernel_bandwidth, show=debug_separation)
     if output_slice_widths:
         with open("slice_widths.json", "w") as f:
             f.write(json.dumps(slice_widths))

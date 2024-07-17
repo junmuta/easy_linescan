@@ -139,6 +139,8 @@ $ python3 trackstrip.py -s my_video.mp4
 ```-d, --head_tail_to_discard```: Amount of frames next to the boundary that will be discarded (boundaries have unreliable tracking)  
 ```-y, --dy_limit```: Limit of how much a keypoint can move in the y axis, until it's discarded  
 ```-m, --frame_match_dist```: How many frames apart the tracking is done (higher is smoother, lower is more sensitive)  
+```--kernel_bandwidth```: Smoothness of the kernel density graph. (default: 1)  
+```--match_outlier_stdevs```: Amount of standard deviations from the mean allowed for change in x for keypoint matches  
 ```--width_checking_radius```: Amount of frames on either side to consider for mean and stdevs when removing outlier slice widths  
 ```--override_multiply_widths```: A multiplier to override the slice widths by  
 ```--debug_match```: Turn on visual debug output for keypoint matching  
