@@ -67,7 +67,7 @@ and we lose 1.4 pixels worth of slice widths.
 So, the modified rounding algorithm rounds each number, keeps track of the difference between the rounded number and the original, and uses that to restore any lost pixels. (line 369)
 
 Now, combining slices from each frame of the original video with the slice widths we found, we get:  
-![demo output](https://github.com/junmuta/easy_linescan/blob/main/demo/hcmt_epk.png?raw=true)
+![demo output](https://github.com/junmuta/easy_linescan/blob/main/demo/comeng.png?raw=true)
 
 #### Success!
 
