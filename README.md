@@ -13,7 +13,7 @@ Zoomed:
 ![demo zoomed output](https://github.com/junmuta/easy_linescan/blob/main/demo/hcmt_epk_zoomed.png?raw=true)
 
 Try this out for yourself:  
-```$ python3 trackstrip.py -s demo/hcmt_epk.mp4 -rf```
+```$ python3 trackstrip.py -s demo/hcmt_epk.mp4```
 
 ## How it works:
 
@@ -132,8 +132,8 @@ $ python3 trackstrip.py -s my_video.mp4
 
 ```-s, --specify_video```: Select video file  
 ```-o, --output_file```: Select file to output to  
-```-r, --reverse```: Reverse each slice in the x axis  
-```-f, --flip```: Flip final image in the x axis  
+```-r, --reverse```: Reverse each slice in the x axis (reverse and flip shouldn't be needed anymore as most of this is handled automatically by the slice polarity checker) 
+```-f, --flip```: Flip final image in the x axis (see above ^) 
 ```-c, --column```: Specify which column in the frames to take either side of as the slice  
 ```-e, --consecutive_errors_tolerated```: Amount of consecutive tracking errors that declares the boundary of the train  
 ```-d, --head_tail_to_discard```: Amount of frames next to the boundary that will be discarded (boundaries have unreliable tracking)  
@@ -145,6 +145,8 @@ $ python3 trackstrip.py -s my_video.mp4
 ```--override_multiply_widths```: A multiplier to override the slice widths by  
 ```--debug_match```: Turn on visual debug output for keypoint matching  
 ```--debug_separation```: Show kernel density estimation graph  
-```--output_slice_widths```: Output slice width (velocity in pixels/frame) data as json
+
+The following used to exist but doesn't do anything anymore, as this is now standard behaviour. It is kept just in case this program is used in a script that uses this option:
+```--output_slice_widths```: Output slice width (velocity in pixels/frame) data as json 
 
 

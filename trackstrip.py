@@ -46,9 +46,14 @@ width_multiplier = args.override_multiply_widths
 match_frame_dist = args.frame_match_dist
 checking_radius = args.width_checking_radius
 allowed_stdevs = args.width_allowed_stdevs
-output_slice_widths = args.output_slice_widths
+# output_slice_widths = args.output_slice_widths
 match_outlier_stdevs = args.match_outlier_stdevs
 kernel_bandwidth = args.kernel_bandwidth
+
+if not match_frame_dist:
+    match_frame_dist = 4
+else:
+    match_frame_dist = int(match_frame_dist)
 
 cache_dir = "~/.cache/easy_linescan"
 
@@ -112,12 +117,13 @@ def remove_outliers(show, dxs, dys, matches, stdevs):
     return dxs, dys, refined_matches, outlier_rejected_dxs, outlier_rejected_dys, outlier_rejected_matches
 
 def find_maximums(e, s): # doesn't do shit about same values next to each other, fix if needed
+    # e is the density from kde, s is the x position
     maximums = []
     for a in range(len(e)-2):
         i = a+1
         if e[i] >= e[i-1] and e[i] >= e[i+1]:
-            maximums.append([e[i], abs(s[i])])
-    maximums = sorted(maximums, reverse=True, key=lambda max: max[1])
+            maximums.append([e[i], s[i]])
+    maximums = sorted(maximums, reverse=True, key=lambda max: abs(max[1]))
     return maximums
 
 def match_keypoints(kp_descs, bf, dy_limit, match_frame_dist, match_outlier_stdevs, show=False):
@@ -242,8 +248,10 @@ def get_slice_widths(dxses, width_multiplier, kernel_bandwidth, show=False):
             continue
         a = np.array(dxs).reshape(-1, 1)
         kde = KernelDensity(kernel='gaussian', bandwidth=kernel_bandwidth).fit(a)
-        s = np.linspace(min(dxs),max(dxs))
+        # s is the x axis
+        s = np.linspace(min(dxs)-1,max(dxs)+1)
 
+        # e is the density for each x point
         e = kde.score_samples(s.reshape(-1,1))
         if show:
             plt.plot(s, e)
@@ -405,7 +413,7 @@ def clean_slice_widths(slice_widths, longest_allowed_None, discard_info, checkin
   
     return new_slice_widths
 
-def construct_final_image(slice_widths, videoloc, column, reverse):
+def construct_final_image(slice_widths, videoloc, column, reverse, polarity):
     final_width = sum(slice_widths)
 
     vidcap = cv2.VideoCapture(videoloc)
@@ -422,19 +430,49 @@ def construct_final_image(slice_widths, videoloc, column, reverse):
         column = int(column)
 
     count = 0
-    pos = 0
+    if polarity == "negative":
+        pos = 0
+    else:
+        pos = final_width
+
     while True:
         print(f"Combining frame {count}, column {pos}", end="\r")
+
+        # get the slice width
         current_frame_width = slice_widths[count]
-        column_frame = image[:, column : column+current_frame_width]
+
+        # take the columns out
+        column_frame = image[:, column-math.floor(current_frame_width/2) : column+math.ceil(current_frame_width/2)]
+
+        # flip the columns if specified
         if reverse:
             column_frame = column_frame[:, ::-1]
-        final_image[:, pos : pos+current_frame_width] = column_frame
+
+        # stack the image
+        if polarity == "negative":
+            end1 = pos
+            end2 = pos+current_frame_width
+        else:
+            end1 = pos-current_frame_width
+            end2 = pos
+
+        # put slice in image
+        final_image[:, end1:end2] = column_frame
+
+        # end condition
         count += 1
         if len(slice_widths) == count:
             break
-        pos += slice_widths[count-1]
+
+        # move head
+        if polarity == "negative":
+            pos += slice_widths[count-1]
+        else:
+            pos -= slice_widths[count-1]
+
+        # read next frame
         success,image = vidcap.read()
+
     print(f"Combining frame {count}, column {pos}")
     return final_image
 
@@ -474,29 +512,43 @@ def read_cache(cache_path, video_hash):
     else:
         return False
 
+def widths_process_polarity(slice_widths):
+    total_width = sum([width for width in slice_widths if width != None])
+    polarity = "negative"
+    if total_width >= 0:
+        polarity = "positive"
+    print(f"Total width is {polarity} ({total_width})")
+
+    # remove polarity because the rest of the program wasn't written with it in mind, also only a global polarity is needed for the final stacking
+    # at this point we also remove the widths with opposite polarity as they would be junk data (jitters or something)
+    if polarity == "positive":
+        new_slice_widths = [abs(width) if (width != None and width >= 0) else None for width in slice_widths]
+    else:
+        new_slice_widths = [abs(width) if (width != None and width <= 0) else None for width in slice_widths]
+
+    return new_slice_widths, polarity
+
+
 if videoloc:
     orb = cv2.ORB_create() # orb keypoint grabber
     kp_descs = get_keypoints(videoloc, orb)
 
     bf=cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True) # brute force keypoint matcher
 
-    if not match_frame_dist:
-        match_frame_dist = 4
-    else:
-        match_frame_dist = int(match_frame_dist)
 
     dxses = match_keypoints(kp_descs, bf, dy_limit, match_frame_dist, match_outlier_stdevs, show=debug_match)
     slice_widths = get_slice_widths(dxses, width_multiplier, kernel_bandwidth, show=debug_separation)
-    if output_slice_widths:
-        with open("slice_widths.json", "w") as f:
-            f.write(json.dumps(slice_widths))
+    # if output_slice_widths:
+    with open("slice_widths.json", "w") as f:
+        f.write(json.dumps(slice_widths))
     # slice_widths = json.loads(open("slice_widths.json").read())
+    slice_widths, polarity = widths_process_polarity(slice_widths)
     [None]*math.floor(match_frame_dist/2) + slice_widths + [None]*math.ceil(match_frame_dist/2) 
     slice_widths = clean_slice_widths(slice_widths, longest_allowed_None, discard_info, checking_radius, allowed_stdevs)
-    if output_slice_widths:
-        with open("processed_slice_widths.json", "w") as f:
-            f.write(json.dumps(slice_widths))
-    image = construct_final_image(slice_widths, videoloc, column, reverse)
+    # if output_slice_widths:
+    with open("processed_slice_widths.json", "w") as f:
+        f.write(json.dumps(slice_widths))
+    image = construct_final_image(slice_widths, videoloc, column, reverse, polarity)
     if not output:
         output = "output.png"
 
