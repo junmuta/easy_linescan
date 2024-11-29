@@ -341,7 +341,7 @@ def clean_slice_widths(slice_widths, longest_allowed_None, discard_info, checkin
     for slice_group in simplified_slices:
         if not (slice_group[0] == None and slice_group[1] >= longest_allowed_None):
             no_none_slices.append(slice_group)
-      
+     
     cuts = []
     for slice_group in no_none_slices:
         if cuts == []:
